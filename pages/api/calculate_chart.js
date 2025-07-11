@@ -2,68 +2,86 @@ import axios from 'axios';
 import { utc_to_jd, houses, calc_ut, SUN, MOON, MERCURY, VENUS, MARS, 
         JUPITER, SATURN, URANUS, NEPTUNE, PLUTO, SE_ASC, SE_GREG_CAL } from 'swisseph';
 
+// Указываем ручной путь к эфемеридам
+process.env.SWISSEPH_EPHE_PATH = process.cwd() + '/ephe';
+
 export default async function handler(req, res) {
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST allowed' });
+    return res.status(405).json({ error: 'Only POST method allowed' });
   }
 
   try {
     const { dob, time = '00:00', place_of_birth, latitude, longitude } = req.body;
-
-    if (!dob) return res.status(400).json({ error: 'dob is required' });
-
-    // Получаем координаты
-    let lat = latitude;
-    let lng = longitude;
     
-    if (place_of_birth && !lat && !lng) {
+    if (!dob) return res.status(400).json({ error: 'Date of birth (dob) is required' });
+
+    let coords = { lat: latitude, lng: longitude };
+    
+    if (place_of_birth && !coords.lat && !coords.lng) {
       const response = await axios.get(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place_of_birth)}`,
         { headers: { 'User-Agent': 'AstrologyAPI/1.0' } }
       );
       if (response.data?.[0]) {
-        lat = parseFloat(response.data[0].lat);
-        lng = parseFloat(response.data[0].lon);
+        coords.lat = parseFloat(response.data[0].lat);
+        coords.lng = parseFloat(response.data[0].lon);
       }
     }
 
-    if (!lat || !lng) return res.status(400).json({ error: 'Invalid coordinates' });
+    if (!coords.lat || !coords.lng) {
+      return res.status(400).json({ error: 'Valid coordinates required' });
+    }
 
-    // Расчет карты
     const [day, month, year] = dob.split('/').map(Number);
     const [hour, minute] = time.split(':').map(Number);
     const jd = utc_to_jd(year, month, day, hour, minute, 0, SE_GREG_CAL)[1];
-    const housesResult = houses(jd, lat, lng, 'P');
-    const ascendant = housesResult[0][0];
-
-    const planets = {
-      'Sun': SUN, 'Moon': MOON, 'Mercury': MERCURY, 'Venus': VENUS,
-      'Mars': MARS, 'Jupiter': JUPITER, 'Saturn': SATURN,
-      'Uranus': URANUS, 'Neptune': NEPTUNE, 'Pluto': PLUTO
-    };
+    const housesResult = houses(jd, coords.lat, coords.lng, 'P');
 
     const result = {
       date: dob,
       time,
-      coordinates: { latitude: lat, longitude: lng },
-      planets: Object.entries(planets).reduce((acc, [name, id]) => {
-        const pos = calc_ut(jd, id);
-        acc[name] = {
-          longitude: pos[0],
-          sign: ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'][Math.floor(pos[0]/30)]
-        };
-        return acc;
-      }, {}),
+      coordinates: coords,
       ascendant: {
-        longitude: ascendant,
-        sign: ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'][Math.floor(ascendant/30)]
+        longitude: housesResult[0][0],
+        sign: getZodiacSign(housesResult[0][0])
+      },
+      planets: {
+        Sun: calcPlanet(SUN, jd),
+        Moon: calcPlanet(MOON, jd),
+        Mercury: calcPlanet(MERCURY, jd),
+        Venus: calcPlanet(VENUS, jd),
+        Mars: calcPlanet(MARS, jd),
+        Jupiter: calcPlanet(JUPITER, jd),
+        Saturn: calcPlanet(SATURN, jd),
+        Uranus: calcPlanet(URANUS, jd),
+        Neptune: calcPlanet(NEPTUNE, jd),
+        Pluto: calcPlanet(PLUTO, jd)
       }
     };
 
     return res.status(200).json(result);
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Calculation failed' });
+    console.error('Calculation error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
+}
+
+function calcPlanet(planetId, jd) {
+  const pos = calc_ut(jd, planetId);
+  return {
+    longitude: pos[0],
+    sign: getZodiacSign(pos[0])
+  };
+}
+
+function getZodiacSign(longitude) {
+  const signs = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  return signs[Math.floor(longitude/30)];
 }
