@@ -5,22 +5,14 @@
       "src": "package.json",
       "use": "@vercel/next",
       "config": {
-        "includeFiles": ["ephe/**"],
-        "nodeVersion": "16.x",
-        "distDir": ".next"
+        "nodeVersion": "20.x"
       }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1",
-      "methods": ["GET", "POST", "OPTIONS"]
-    },
-    {
-      "src": "/",
-      "dest": "/pages/index.js",
-      "methods": ["GET"]
+      "dest": "/api/$1"
     }
   ]
 }
