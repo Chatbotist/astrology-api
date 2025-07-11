@@ -5,7 +5,7 @@ const AdmZip = require('adm-zip');
 
 async function downloadEphemeris() {
   try {
-    const epheDir = path.join(__dirname, 'node_modules', 'swe', 'ephe');
+    const epheDir = path.join(__dirname, 'node_modules', 'swisseph', 'ephe');
     if (!fs.existsSync(epheDir)) {
       fs.mkdirSync(epheDir, { recursive: true });
     }
