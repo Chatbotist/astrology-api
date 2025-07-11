@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "next": "^13.0.0",
-    "axios": "^1.6.2",
-    "astrology-engine": "^1.2.3"
+    "axios": "^1.6.2"
   },
   "engines": {
     "node": "18.x"
