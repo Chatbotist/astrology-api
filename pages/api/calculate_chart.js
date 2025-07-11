@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { utc_to_jd, houses, calc_ut, SUN, MOON, MERCURY, VENUS, MARS, 
-        JUPITER, SATURN, URANUS, NEPTUNE, PLUTO, SE_ASC, SE_GREG_CAL } from 'swe';
+        JUPITER, SATURN, URANUS, NEPTUNE, PLUTO, SE_ASC, SE_GREG_CAL } from 'swisseph';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -23,6 +23,8 @@ export default async function handler(req, res) {
     }
 
     const [day, month, year] = dob.split('/').map(Number);
+    const [hour, minute] = time.split(':').map(Number);
+
     if (isNaN(day) || isNaN(month) || isNaN(year)) {
       return res.status(400).json({ error: 'Invalid date format. Use DD/MM/YYYY' });
     }
