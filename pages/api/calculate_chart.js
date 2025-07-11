@@ -3,23 +3,19 @@ import { utc_to_jd, houses, calc_ut, SUN, MOON, MERCURY, VENUS, MARS,
         JUPITER, SATURN, URANUS, NEPTUNE, PLUTO, SE_ASC, SE_GREG_CAL } from 'swisseph';
 
 export default async function handler(req, res) {
+  // Явная обработка CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).json({ error: `Method ${req.method} not allowed` });
   }
-
-  try {
-    const { place_of_birth, latitude, longitude, dob, time = '00:00' } = req.body;
-
-    if (!dob) {
-      return res.status(400).json({ error: 'Date of birth is required' });
-    }
 
     let finalLat = latitude;
     let finalLng = longitude;
