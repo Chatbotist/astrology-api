@@ -5,14 +5,20 @@
       "src": "package.json",
       "use": "@vercel/next",
       "config": {
-        "nodeVersion": "20.x"
+        "includeFiles": ["ephe/**"],
+        "nodeVersion": "18.x"
       }
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/calculate_chart",
+      "dest": "/api/calculate_chart",
+      "methods": ["POST"]
+    },
+    {
+      "src": "/",
+      "dest": "/pages/index.js"
     }
   ]
 }
