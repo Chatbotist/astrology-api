@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { utc_to_jd, houses, calc_ut, SUN, MOON, MERCURY, VENUS, MARS, 
-        JUPITER, SATURN, URANUS, NEPTUNE, PLUTO, SE_ASC, SE_GREG_CAL } from 'swisseph';
+        JUPITER, SATURN, URANUS, NEPTUNE, PLUTO, SE_ASC, SE_GREG_CAL } from 'swe';
 
 export default async function handler(req, res) {
-  // Настройка CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -13,19 +12,19 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Только POST запросы разрешены' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     const { place_of_birth, latitude, longitude, dob, time = '00:00' } = req.body;
 
     if (!dob) {
-      return res.status(400).json({ error: 'Укажите дату рождения (dob)' });
+      return res.status(400).json({ error: 'Date of birth (dob) is required' });
     }
 
     const [day, month, year] = dob.split('/').map(Number);
     if (isNaN(day) || isNaN(month) || isNaN(year)) {
-      return res.status(400).json({ error: 'Формат даты: ДД/ММ/ГГГГ' });
+      return res.status(400).json({ error: 'Invalid date format. Use DD/MM/YYYY' });
     }
 
     let finalLat = latitude;
@@ -34,14 +33,14 @@ export default async function handler(req, res) {
     if (place_of_birth && !latitude && !longitude) {
       const coords = await getCoordinates(place_of_birth);
       if (!coords) {
-        return res.status(400).json({ error: 'Не удалось найти координаты для места рождения' });
+        return res.status(400).json({ error: 'Could not geocode place of birth' });
       }
       finalLat = coords.latitude;
       finalLng = coords.longitude;
     }
 
     if (!finalLat || !finalLng) {
-      return res.status(400).json({ error: 'Укажите место рождения или координаты' });
+      return res.status(400).json({ error: 'Coordinates or place of birth required' });
     }
 
     const jd = utc_to_jd(year, month, day, hour, minute, 0, SE_GREG_CAL);
@@ -84,8 +83,8 @@ export default async function handler(req, res) {
     return res.status(200).json(response);
 
   } catch (error) {
-    console.error('Ошибка:', error);
-    return res.status(500).json({ error: 'Ошибка сервера', details: error.message });
+    console.error('Error:', error);
+    return res.status(500).json({ error: 'Server error', details: error.message });
   }
 }
 
@@ -100,16 +99,16 @@ async function getCoordinates(place) {
       longitude: parseFloat(response.data[0].lon)
     } : null;
   } catch (error) {
-    console.error('Ошибка геокодирования:', error);
+    console.error('Geocoding error:', error);
     return null;
   }
 }
 
 function getZodiacSign(longitude) {
   const signs = [
-    'Овен', 'Телец', 'Близнецы', 'Рак',
-    'Лев', 'Дева', 'Весы', 'Скорпион',
-    'Стрелец', 'Козерог', 'Водолей', 'Рыбы'
+    'Aries', 'Taurus', 'Gemini', 'Cancer',
+    'Leo', 'Virgo', 'Libra', 'Scorpio',
+    'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
   ];
   return signs[Math.floor(longitude / 30)];
 }
