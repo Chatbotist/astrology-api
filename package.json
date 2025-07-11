@@ -5,16 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "postinstall": "node ./downloadEphemeris.js"
+    "start": "next start"
   },
   "dependencies": {
     "next": "^13.0.0",
-    "axios": "^1.6.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "swisseph": "^0.5.15",
-    "adm-zip": "^0.5.10"
-  },
-  "engines": {
-    "node": "18.x"
+    "axios": "^1.6.2"
   }
 }
