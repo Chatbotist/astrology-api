@@ -19,18 +19,15 @@ export default async function handler(req, res) {
   try {
     const { place_of_birth, latitude, longitude, dob, time = '00:00' } = req.body;
 
-    // Валидация
     if (!dob) {
       return res.status(400).json({ error: 'Укажите дату рождения (dob)' });
     }
 
-    // Проверка формата даты
     const [day, month, year] = dob.split('/').map(Number);
     if (isNaN(day) || isNaN(month) || isNaN(year)) {
       return res.status(400).json({ error: 'Формат даты: ДД/ММ/ГГГГ' });
     }
 
-    // Получение координат
     let finalLat = latitude;
     let finalLng = longitude;
 
@@ -47,15 +44,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Укажите место рождения или координаты' });
     }
 
-    // Расчет юлианской даты
     const jd = utc_to_jd(year, month, day, hour, minute, 0, SE_GREG_CAL);
     const julianDay = jd[1];
 
-    // Расчет домов (система Placidus)
     const housesResult = houses(julianDay, finalLat, finalLng, 'P');
     const ascendant = housesResult[0][0];
 
-    // Планеты и их позиции
     const planets = {
       'Sun': SUN, 'Moon': MOON, 'Mercury': MERCURY, 'Venus': VENUS,
       'Mars': MARS, 'Jupiter': JUPITER, 'Saturn': SATURN,
@@ -71,13 +65,11 @@ export default async function handler(req, res) {
       };
     }
 
-    // Добавляем Ascendant
     planetPositions['Ascendant'] = {
       longitude: ascendant,
       sign: getZodiacSign(ascendant)
     };
 
-    // Формируем ответ
     const response = {
       coordinates: { latitude: finalLat, longitude: finalLng },
       date: { date_of_birth: dob, time_of_birth: time, julian_day: julianDay },
@@ -97,7 +89,6 @@ export default async function handler(req, res) {
   }
 }
 
-// Вспомогательные функции
 async function getCoordinates(place) {
   try {
     const response = await axios.get(
