@@ -5,34 +5,27 @@ const AdmZip = require('adm-zip');
 
 async function downloadEphemeris() {
   try {
-    const epheDir = path.join(__dirname, 'node_modules', 'swisseph', 'ephe');
-    
-    // Создаем папку, если ее нет
+    const epheDir = path.join(__dirname, 'node_modules', 'swe', 'ephe');
     if (!fs.existsSync(epheDir)) {
       fs.mkdirSync(epheDir, { recursive: true });
     }
 
-    // Скачиваем архив с эфемеридами
-    console.log('Скачивание эфемерид...');
+    console.log('Downloading ephemeris...');
     const response = await axios.get('https://www.astro.com/ftp/swisseph/ephe/archive_ephe_2020.zip', {
       responseType: 'arraybuffer'
     });
 
-    // Сохраняем архив
     const zipPath = path.join(epheDir, 'ephe.zip');
     fs.writeFileSync(zipPath, response.data);
 
-    // Распаковываем
-    console.log('Распаковка...');
+    console.log('Unzipping...');
     const zip = new AdmZip(zipPath);
     zip.extractAllTo(epheDir, true);
 
-    // Удаляем архив
     fs.unlinkSync(zipPath);
-    console.log('Эфемериды успешно установлены!');
-
+    console.log('Ephemeris installed successfully!');
   } catch (error) {
-    console.error('Ошибка при загрузке эфемерид:', error.message);
+    console.error('Error downloading ephemeris:', error.message);
     process.exit(1);
   }
 }
