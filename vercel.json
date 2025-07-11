@@ -5,7 +5,10 @@
       "src": "package.json",
       "use": "@vercel/next",
       "config": {
-        "includeFiles": ["ephe/**"]
+        "includeFiles": ["ephe/**"],
+        "nodeVersion": "18.x",
+        "distDir": ".next",
+        "forceBuildInContainer": true
       }
     }
   ],
@@ -13,11 +16,12 @@
     {
       "src": "/api/(.*)",
       "dest": "/api/$1",
-      "methods": ["POST", "OPTIONS"]
+      "methods": ["GET", "POST", "OPTIONS"]
     },
     {
       "src": "/",
-      "dest": "/pages/index.js"
+      "dest": "/pages/index.js",
+      "methods": ["GET"]
     }
   ]
 }
