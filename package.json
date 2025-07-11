@@ -5,15 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "postinstall": "node ./downloadEphemeris.js"
+    "start": "next start"
   },
   "dependencies": {
     "next": "^13.0.0",
     "axios": "^1.6.2",
-    "swisseph": "^0.5.15",
-    "adm-zip": "^0.5.10",
-    "node-gyp": "^9.0.0"
+    "astrology-engine": "^1.2.3"
   },
   "engines": {
     "node": "18.x"
