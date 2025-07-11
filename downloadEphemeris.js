@@ -1,30 +1,49 @@
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');
-const AdmZip = require('adm-zip');
+const https = require('https');
 
-async function downloadEphemeris() {
+const EPHE_URL = 'https://www.astro.com/ftp/swisseph/ephe/archive_ephe_2020.zip';
+const EPHE_DIR = path.join(__dirname, 'node_modules', 'swisseph', 'ephe');
+
+function downloadFile(url, dest) {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(dest);
+    https.get(url, (response) => {
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close(resolve);
+      });
+    }).on('error', (err) => {
+      fs.unlink(dest, () => reject(err));
+    });
+  });
+}
+
+function unzipFile(zipPath, targetDir) {
+  const AdmZip = require('adm-zip');
+  const zip = new AdmZip(zipPath);
+  zip.extractAllTo(targetDir, true);
+}
+
+async function setupEphemeris() {
   try {
-    const epheDir = path.join(__dirname, 'node_modules', 'swisseph', 'ephe');
-    if (!fs.existsSync(epheDir)) {
-      fs.mkdirSync(epheDir, { recursive: true });
+    if (!fs.existsSync(EPHE_DIR)) {
+      fs.mkdirSync(EPHE_DIR, { recursive: true });
     }
 
-    const response = await axios.get('https://www.astro.com/ftp/swisseph/ephe/archive_ephe_2020.zip', {
-      responseType: 'arraybuffer'
-    });
-
-    const zipPath = path.join(epheDir, 'ephe.zip');
-    fs.writeFileSync(zipPath, response.data);
-
-    const zip = new AdmZip(zipPath);
-    zip.extractAllTo(epheDir, true);
+    const zipPath = path.join(EPHE_DIR, 'ephe.zip');
+    console.log('Downloading ephemeris...');
+    await downloadFile(EPHE_URL, zipPath);
+    
+    console.log('Unzipping...');
+    unzipFile(zipPath, EPHE_DIR);
     fs.unlinkSync(zipPath);
-
+    
+    console.log('Ephemeris installed successfully!');
   } catch (error) {
-    console.error('Error downloading ephemeris:', error.message);
+    console.error('Error setting up ephemeris:', error.message);
     process.exit(1);
   }
 }
 
-downloadEphemeris();
+setupEphemeris();
