@@ -3,10 +3,7 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/next",
-      "config": {
-        "installCommand": "npm install --python=python3.10"
-      }
+      "use": "@vercel/next"
     }
   ],
   "routes": [
