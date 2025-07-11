@@ -11,8 +11,9 @@
   "dependencies": {
     "next": "^13.0.0",
     "axios": "^1.6.2",
-    "swe": "^3.0.0",
-    "adm-zip": "^0.5.10"
+    "swisseph": "^0.5.15",
+    "adm-zip": "^0.5.10",
+    "node-gyp": "^9.0.0"
   },
   "engines": {
     "node": "18.x"
