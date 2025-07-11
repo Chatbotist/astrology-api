@@ -5,11 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "postinstall": "node -e \"try{require('@topastro/swisseph/postinstall')}catch(e){}\""
   },
   "dependencies": {
     "next": "^13.0.0",
     "axios": "^1.6.2",
-    "swisseph": "^0.5.15"
+    "@topastro/swisseph": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.x"
   }
 }
