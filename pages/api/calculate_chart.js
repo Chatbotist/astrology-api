@@ -1,9 +1,11 @@
 import axios from 'axios';
 import { utc_to_jd, houses, calc_ut, SUN, MOON, MERCURY, VENUS, MARS, 
         JUPITER, SATURN, URANUS, NEPTUNE, PLUTO, SE_ASC, SE_GREG_CAL } from 'swisseph';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Указываем ручной путь к эфемеридам
-process.env.SWISSEPH_EPHE_PATH = process.cwd() + '/ephe';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+process.env.SWISSEPH_EPHE_PATH = path.join(__dirname, '../../ephe');
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -13,7 +15,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST method allowed' });
+    return res.status(405).json({ error: 'Only POST allowed' });
   }
 
   try {
@@ -68,8 +70,11 @@ export default async function handler(req, res) {
     return res.status(200).json(result);
 
   } catch (error) {
-    console.error('Calculation error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Error:', error);
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message
+    });
   }
 }
 
