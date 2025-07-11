@@ -10,11 +10,12 @@
     {
       "src": "/api/calculate_chart",
       "dest": "/api/calculate_chart",
-      "methods": ["POST", "OPTIONS"]
-    },
-    {
-      "src": "/api/500",
-      "status": 500
+      "methods": ["POST", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
     }
   ]
 }
