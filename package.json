@@ -6,14 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "node -e \"try{require('@topastro/swisseph/postinstall')}catch(e){console.log('Postinstall skipped')}\""
+    "postinstall": "node -e \"try{require('swisseph/postinstall')}catch(e){console.log('Postinstall skipped')}\""
   },
   "dependencies": {
     "next": "^13.4.19",
     "axios": "^1.6.2",
-    "@topastro/swisseph": "^1.0.2"
+    "swisseph": "^0.5.15"
   },
   "engines": {
-    "node": "18.x"
+    "node": "16.x"
   }
 }
